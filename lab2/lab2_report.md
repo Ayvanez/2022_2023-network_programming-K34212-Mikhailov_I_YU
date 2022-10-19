@@ -59,5 +59,5 @@
 
 В итоге получилась следующая сеть:
 
-<img src="https://user-images.githubusercontent.com/56927592/196517423-f58e1298-e5c8-4c2b-953a-199f1688f7c0.png" width="500" height="400" />
+<img src="https://user-images.githubusercontent.com/56927592/196662085-919e0313-d58f-4135-a31f-93c8b77491e3.png" width="500" height="400" />
 
