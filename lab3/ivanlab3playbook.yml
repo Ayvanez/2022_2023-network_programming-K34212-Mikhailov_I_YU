@@ -1,0 +1,24 @@
+---
+- name: get info from netbox
+  connection: local
+  hosts: localhost
+  become: true
+  gather_facts: False
+
+  tasks:
+    - name: Obtain list of devices from Netbox
+#      set_fact: name1 = "{{ item.value.name }}"
+#      set_fact: ipadd = "{{ item.value.primary_ip.display }}"
+#      debug:
+#        msg: >
+#          "Device {{ item.value.name }} has
+#           IP addres {{ item.value.primary_ip.display }}"
+      loop: "{{ query('netbox.netbox.nb_lookup', 'devices',
+                      api_endpoint='http://localhost/',
+                      token='09d6468bb87ac443267f5548ded72649dabbd966') }}"
+      register: info
+
+    - name: save
+      copy:
+        dest: '/etc/ansible/info.json
+        content: info
