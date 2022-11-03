@@ -1,0 +1,30 @@
+  GNU nano 6.2                              ivan_tobox_playbook.yml                                       ---
+- name: Get serial number from router and put it to netbox
+  hosts: servers
+  gather_facts: False
+  vars:
+    input: "{{ lookup('file','{{ filename }}') | from_json }}"
+
+  tasks:
+   - name: Collect all facts from the device
+     community.routeros.facts:
+       gather_subset: all
+     register: all_info
+
+   - name: Print all facts
+     debug:
+       var: all_info.ansible_facts.ansible_net_version
+
+   - name: Save OS version to variable
+     set_fact:
+       os_version: "{{ all_info.ansible_facts.ansible_net_version }}"
+
+   - name: Add OS version to NetBox
+     netbox_device:
+       netbox_url: http://localhost:8001
+       netbox_token: 09d6468bb87ac443267f5548ded72649dabbd966
+       data:
+         name: "{{ input.inventory_hostname }}"
+         custom_fields:
+           OS_version: "{{ os_version }}"
+       state: present
