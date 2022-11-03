@@ -1,49 +1,27 @@
 ---
-- name: get info from netbox
-  connection: local
-  hosts: localhost
-  become: true
+- name: Routers setup
+  hosts: servers
   gather_facts: False
+  vars:
+    input: "{{ lookup('file','{{ filename }}') | from_json }}"
 
   tasks:
-#    - name: Obtain list of devices from Netbox
-#      set_fact: name1 = "{{ item.value.name }}"
-#      set_fact: ipadd = "{{ item.value.primary_ip.display }}"
-#      debug:
-#        msg: >
-#          "Device {{ item.value.name }} has
-#           IP addres {{ item.value.primary_ip.display }}"
-#      loop: "{{ query('netbox.netbox.nb_lookup', 'devices',
-#                      api_endpoint='http://localhost/',
-#                      token='09d6468bb87ac443267f5548ded72649dabbd966') }}"
-#      register: info
-    - name: "TASK 1: GET devices WITH NB_QUERY"
-      set_fact:
-        devices: "{{ query('netbox.netbox.nb_lookup', 'devices',
-                           api_endpoint='http://localhost/',
-                           token='09d6468bb87ac443267f5548ded72649dabbd966') }}"
-    - name: проверка
-      debug:
-         msg: "device: {{ devices[0].value.name }}"
+   - name: Get new router name
+     set_fact:
+       router_name: "{{ input.inventory_hostname }}"
 
-    - name: save to hostvars
-      local_action: copy content="{{ item.variable }}" dest="/etc/ansible/host_vars/{{ item.host }}"
-      with_items:
-        - variable: "name: {{ devices[0].value.name }}
-                    ipadd: {{devices[0].value.primary_ip.display}}"
-          host: mikrotikiv
-        - variable: "name: {{ devices[1].value.name }}"
-          host: mikrotikal
-        - variable: "ipadd: {{devices[1].value.primary_ip.display}}"
-          host: mikrotikal
+   - name: Set router name
+     community.routeros.command:
+       commands: /system identity set name={{ router_name }}
 
-#- name: routers settings
-#  hosts: servers
-#  become: true
-#  gather_facts: False
+   - name: Get interfaces
+     set_fact:
+       interfaces: "{{ input.interfaces }}"
 
-#  tasks:
-#    - name: Change name of device
-#      community.routeros.command:
-#        commands:
-#          - /system identity set name = {{devices[].value.name}}
+   - name: Set interface bridge_lo
+     community.routeros.command:
+       commands:
+         - /interface bridge add name="{{ item.name }}"
+         - /ip address add address="{{ item.ip_addresses[0].address }}" interface="{{ item.name }}"
+     when: item.name == "loopback2"
+     with_items: "{{ interfaces }}"
