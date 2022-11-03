@@ -6,3 +6,4 @@ validate_certs: False
 config_context: False
 group_by:
   - device_roles
+interfaces: 'True'
