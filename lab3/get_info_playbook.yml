@@ -1,0 +1,16 @@
+---
+- name: get info from netbox
+  connection: local
+  hosts: localhost
+  become: true
+  gather_facts: False
+
+  tasks:
+    - name: Save Router1 to a file
+      copy:
+        content: "{{ hostvars.Router1 }}"
+        dest: ./Router1
+    - name: Save Router2 to a file
+      copy:
+        content: "{{ hostvars.Router2 }}"
+        dest: ./Router2
